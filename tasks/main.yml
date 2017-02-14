@@ -1,0 +1,43 @@
+---
+# tasks file for nullmailer
+- name: "Remove postfix"
+  apt: pkg=postfix state=removed
+- name: Install packages
+  apt: pkg=nullmailer state=installed
+  when: ansible_os_family == "Debian"
+- name: Install mailutils
+  apt: pkg=mailutils state=installed
+  when: ansible_os_family == "Debian"
+
+- name: Enable service
+  service:
+    name: nullmailer
+    enabled: yes
+
+- name: Create remotes config
+  template: src=remotes.j2 dest=/etc/nullmailer/remotes mode=0644
+  notify: reload nullmailer
+
+- name: Crete defaultdomain config
+  lineinfile: dest=/etc/nullmailer/defaultdomain regexp="^" line="{{ nullmailer_defaultdomain }}" mode=0644 state=present create=yes
+  notify: reload nullmailer
+  when: nullmailer_defaultdomain is defined
+
+- name: Create defaulthost config
+  lineinfile: dest=/etc/nullmailer/defaulthost regexp="^" line="{{ nullmailer_defaulthost }}" mode=0644 state=present create=yes
+  notify: reload nullmailer
+  when: nullmailer_defaulthost is defined
+
+- name: Create me config
+  lineinfile: dest=/etc/nullmailer/me regexp="^" line="{{ nullmailer_me }}" mode=0644 state=present create=yes
+  notify: reload nullmailer
+  when: nullmailer_me is defined
+
+- name: Create mailname
+  template: src=mailname.j2 dest=/etc/mailname mode=0644
+  notify: reload nullmailer
+
+- name: Create adminaddress config
+  lineinfile: dest=/etc/nullmailer/adminaddr regexp="^" line="{{ nullmailer_adminaddress }}" mode=0644 state=present create=yes
+  notify: reload nullmailer
+  when: nullmailer_adminaddress is defined

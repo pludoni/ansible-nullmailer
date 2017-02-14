@@ -1,0 +1,4 @@
+- name: reload nullmailer
+  service:
+    name: nullmailer
+    state: restarted
